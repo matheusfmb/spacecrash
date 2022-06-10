@@ -1,4 +1,4 @@
 PROJETO FINAL DE INTRODUÇÃO A PROGRAMAÇÃO.
   PYTHON PYGAME - JOGO SPACE CRASH. 2022
 
-atuores: Matheus Felipe e Heitor Negromonte
+autores: Matheus Felipe e Heitor Negromonte
