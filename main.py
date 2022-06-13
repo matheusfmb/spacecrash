@@ -3,7 +3,6 @@ import pygame
 import sys
 
 pygame.init()
-
 #VARÍAVEIS DA TELA DO JOGO
 sizex = 360
 sizey = 640
@@ -20,14 +19,20 @@ sizey_cena = 640
 backstart = pygame.image.load("assets/cenario/startmenu.png")
 start = True
 
+#PAUSE
+stop = True
+pauseimage = pygame.image.load("assets/cenario/pause.png")
+
+
 #MÚSICA
-musica_fundo = pygame.mixer.music.load("assets\musicas\start.wav")
+musica_fundo = pygame.mixer.music.load("assets/musicas/start.wav")
 pygame.mixer.music.set_volume(0.03)
 pygame.mixer.music.play(-1)
 
 
 #CARREGANDO IMAGEM DA NAVE E DEFININDO AS VARIÁVEIS PARA MOVIMENTO
 nave = pygame.image.load("assets/nave/spaceShips_008.png")
+velocidade_nave = 2
 nave_x = 160
 nave_y = 550
 nave_moveup = False
@@ -35,25 +40,39 @@ nave_movedown = False
 nave_moveright = False
 nave_moveleft = False
 
+
 #POSIÇÃO DA NAVE NA TELA
 def nave_blit():
     janela.blit(nave,(nave_x,nave_y))
 
 
 #METEOROS CARREGANDO IMAGEM E DEFININDO VARIÁVEIS PARA MOVIMENTO
+velocidade_meteoro = 2.5
+velocidade_plus = random.uniform(0,1.5)
+velocidade_down = random.random()
+
 meteoro1 = pygame.image.load("assets\meteoros\meteoro1.png")
 meteoro_1x = random.randrange(0,sizex-40)
 meteoro_1y = 10
-velocidade = 2.5
 
 meteoro2 = pygame.image.load("assets\meteoros\meteoro1.png")
 meteoro_2x = random.randrange(0,sizex-40)
 meteoro_2y = 10
 
+meteoro3 = pygame.image.load("assets\meteoros\meteoro1.png")
+meteoro_3x = random.randrange(0,sizex-40)
+meteoro_3y = 10
+
+pos_meteoro = []
+pos_meteoro.append(meteoro_1x)
+pos_meteoro.append(meteoro_2x)
+pos_meteoro.append(meteoro_3x)
+
 #POSIÇÃO DO METEORO NA TELA
 def meteoro_blit():
     janela.blit(meteoro1,(meteoro_1x,meteoro_1y))
     janela.blit(meteoro2,(meteoro_2x,meteoro_2y))
+    janela.blit(meteoro3,(meteoro_3x,meteoro_3y))
     
 #DESENHANDO NA TELA - A FUNÇÃO DRAW É A ÚNICA QUE ENTRA NO LOOP DO JOGO. TODAS AS FUNÇÕES PRECISAM SER CHAMADAS DENTRO DELA.
 def draw():
@@ -64,48 +83,80 @@ def draw():
         janela.blit(backstart,(0,0))
     else:
         janela.blit(bg,(0,cena))
-        janela.blit(bg,(0,-sizey_cena+cena))#CRIANDO OUTRA CENA EM CIMA DA CENA
+        janela.blit(bg,(0,-sizey_cena+cena))#CRIANDO OUTRA CENA EM CIMA DA CENA E AUMENTNDO 1 PIXEL QUANDO A CENA "PERDE 1 PIXEL"
+        if stop == False:
+            janela.blit(pauseimage,(5,10))
         #FAZENDO EFEITO DE MOVIMENTO NA CENA
         if cena == sizey_cena:
             cena = 0
         cena+=1
         #DECLARANDO AS OUTRAS FUNÇÕES
-        meteoro_blit()
-        nave_blit()
-        move_nave()
-        move_ast()
+        meteoro_blit() #POSIÇÃO DO METEORO NA TELA
+        nave_blit() #POSIÇÃO DA NAVE NA TELA
+        move_nave() #MOVIMENTAÇÃO DA NAVE
+        move_ast() #MOVIMENTAÇÃO DOS METEOROS
 
 #DEFININDO MOVIMENTAÇÃO DOS METEOROS
 def move_ast():
-    velocidade = 2.5
     global meteoro_1y
-    global meteoro_1x
     global meteoro_2y
+    global meteoro_1x
     global meteoro_2x
-    meteoro_1y += velocidade
+    global meteoro_3x
+    global meteoro_3y
+    global velocidade_meteoro
+    global velocidade_down
+    global velocidade_plus
+
+    meteoro_1y += velocidade_meteoro
     if meteoro_1y > sizey:
         meteoro_1y = 10
         meteoro_1x = random.randrange(0,sizex-40)
-    pygame.time.set_timer(pygame.USEREVENT, 1000)
-    meteoro_2y += velocidade
+        if meteoro_1x in pos_meteoro:
+            meteoro_1x = random.randrange(0,sizex-40)
+        else:
+            pos_meteoro.append(meteoro_1x)
+    
+    meteoro_2y += (velocidade_meteoro+velocidade_plus)
     if meteoro_2y > sizey:
         meteoro_2y = 10
-        meteoro_1x = random.randrange(0,sizex-40)
+        meteoro_2x = random.randrange(0,sizex-40)
+        if stop:
+            velocidade_plus = random.uniform(0,1.5)
+        if meteoro_2x in pos_meteoro:
+            meteoro_2x = random.randrange(0,sizex-40)
+        else:
+            pos_meteoro.append(meteoro_2x)
+
+    meteoro_3y += (velocidade_meteoro-velocidade_down)
+    if meteoro_3y > sizey:
+        meteoro_3y = 10
+        meteoro_3x = random.randrange(0,sizex-40)
+        if stop:
+            velocidade_down = random.random()
+        if meteoro_3x in pos_meteoro:
+            meteoro_3x = random.randrange(0,sizex-40)
+        else:
+            pos_meteoro.append(meteoro_3x)
     
+
+    if len(pos_meteoro) > 30:
+        pos_meteoro.clear()
 
 #DEFININDO MOVIMENTAÇÃO DA NAVE
 def move_nave():
     global nave_x
     global nave_y
+    global velocidade_nave
 
     if nave_moveup:
-        nave_y -= 1.5
+        nave_y -= velocidade_nave
     if nave_movedown:
-        nave_y += 1.5
+        nave_y += velocidade_nave
     if nave_moveleft:
-        nave_x -= 1.5
+        nave_x -= velocidade_nave
     if nave_moveright:
-        nave_x += 1.5
+        nave_x += velocidade_nave
     
     if nave_y <= 0:
         nave_y = 0
@@ -122,6 +173,19 @@ while True:
         if evento.type == pygame.QUIT:
             sys.exit()
         if evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_BACKSPACE:
+                if stop:
+                    stop = False
+                    velocidade_nave = 0
+                    velocidade_meteoro = 0
+                    velocidade_plus = 0
+                    velocidade_down = 0
+                elif stop == False:
+                    stop = True
+                    velocidade_nave = 2
+                    velocidade_meteoro = 2.5
+                    velocidade_plus = random.uniform(0,1.5)
+                    velocidade_down = random.random()
             if evento.key == pygame.K_RETURN:
                 start = False
             if evento.key == pygame.K_UP:
