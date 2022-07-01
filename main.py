@@ -50,7 +50,7 @@ text = font.render("score: " + str(score), True, (255,225,225))
 pos_coin = []
 pos_coin.append(coin_x)
 
-#POSIÇÃO COIN e DESENHO
+#POSIÇÃO COIN
 def coin_blit():
     janela.blit(coin,(coin_x,coin_y))
     janela.blit(text,(10,10))
@@ -64,6 +64,7 @@ nave_x = 160
 laser_x = nave_x+25
 nave_y = 570
 laser_y = nave_y - 50
+nave_rect = 0
 nave_moveup = False
 nave_movedown = False
 nave_moveright = False
@@ -109,12 +110,90 @@ def meteoro_blit():
     if score >= 10:
         janela.blit(meteoro4,(meteoro_4x,meteoro_4y))
 
+#POSIÇÃO DOS RECTS REFERENTE AOS ELEMENTOS DO JOGO
+def rect():
+    global meteoro1_rect
+    global meteoro2_rect
+    global meteoro3_rect
+    global meteoro4_rect
+    global nave_rect
+    global coin_rect
+    global score
+    global laser_rect
+    meteoro1_rect = pygame.draw.rect(janela,(225,0,0),(meteoro_1x+5,meteoro_1y,43,43),1,-3,40,40,40,40)
+    meteoro2_rect = pygame.draw.rect(janela,(225,0,0),(meteoro_2x,meteoro_2y,43,43),1,-3,40,40,40,40)
+    meteoro3_rect = pygame.draw.rect(janela,(225,0,0),(meteoro_3x,meteoro_3y,43,43),1,-3,40,40,40,40)
+    meteoro4_rect = pygame.draw.rect(janela,(225,0,0),(meteoro_4x,meteoro_4y,43,43),1,-3,40,40,40,40)
+    nave_rect = pygame.draw.rect(janela,(225,0,0),(nave_x+10,nave_y,40,49),1,-1,10000,10000,4,4)
+    coin_rect = pygame.draw.rect(janela,(225,0,0),(coin_x,coin_y,40,40),1,-3,40,40,40,40)
+    laser_rect = pygame.draw.rect(janela,(225,0,0),(laser_x,laser_y,9,37),1,-3)
+
+# DEFININDO COLISÃO
+def colisao():
+    global gameover
+    global play_again
+    global meteoro_3y
+    global meteoro_2y
+    global meteoro_1y
+    global start
+    global velocidade_meteoro
+    global nave_x
+    global nave_y
+    global coin_y
+    global score
+    global coin_x
+    global text
+    global meteoro_1x
+    global meteoro_2x
+    global meteoro_3x
+    global meteoro_4x
+    global meteoro_4y
+
+    if nave_rect.colliderect(meteoro1_rect) or nave_rect.colliderect(meteoro2_rect) or nave_rect.colliderect(meteoro3_rect) or nave_rect.colliderect(meteoro4_rect):
+        gameover = False
+        play_again = False
+        meteoro_1y = 10
+        meteoro_2y = 10
+        meteoro_3y = 10
+        meteoro_4y = 10
+        coin_y = -150
+        nave_x = 160
+        nave_y = 550
+        fx_over.play()
+
+    if nave_rect.colliderect(coin_rect):
+        coin_x = random.randrange(0,sizex-40)
+        coin_y = -150
+        score+=1
+        text = font.render("score: " + str(score), True, (255,225,225))
+
+    if laser_rect.colliderect(meteoro1_rect):
+        meteoro_1y = -150
+        meteoro_1x = random.randrange(0,sizex-40) 
+        if meteoro_1x in pos_meteoro:
+            meteoro_1x = random.randrange(0,sizex-40) 
+    if laser_rect.colliderect(meteoro2_rect):
+        meteoro_2y = -150
+        meteoro_2x = random.randrange(0,sizex-40) 
+        if meteoro_2x in pos_meteoro:
+            meteoro_2x = random.randrange(0,sizex-40)  
+    if laser_rect.colliderect(meteoro3_rect):
+        meteoro_3y = -150
+        meteoro_3x = random.randrange(0,sizex-40) 
+        if meteoro_3x in pos_meteoro:
+            meteoro_3x = random.randrange(0,sizex-40) 
+    if laser_rect.colliderect(meteoro4_rect):
+        meteoro_4y = -150
+        meteoro_4x = random.randrange(0,sizex-40) 
+        if meteoro_4x in pos_meteoro:
+            meteoro_4x = random.randrange(0,sizex-40)
     
 #DESENHANDO NA TELA - A FUNÇÃO DRAW É A ÚNICA QUE ENTRA NO LOOP DO JOGO. TODAS AS FUNÇÕES PRECISAM SER CHAMADAS DENTRO DELA.
 def draw():
     global start
     global cena
     global sizey_cena
+    global nave_rect
     global score
     global text 
 
@@ -124,6 +203,7 @@ def draw():
             text = font.render("score: " + str(score), True, (255,225,225))
             janela.blit(backstart,(0,0))
         elif start == False:
+            rect()
             janela.blit(background,(0,cena))
             janela.blit(background,(0,-sizey_cena+cena))#CRIANDO OUTRA CENA EM CIMA DA CENA E AUMENTNDO 1 PIXEL NA PRINCIPAL E DIMINUINDO 1 PIXEL NA SECUNDÁRIA.
             if stop == False:
@@ -138,9 +218,9 @@ def draw():
             nave_blit() #POSIÇÃO DA NAVE NA TELA
             move_nave() #MOVIMENTAÇÃO DA NAVE
             move_ast_coin_laser() #MOVIMENTAÇÃO DOS METEOROS
+            colisao()#COLISÃO
             coin_blit() #COIN 
     else:
-        #TELA DE GAME OVER
         pygame.time.delay(200)
         janela.blit(overimage,(0,0))
         janela.blit(text,(100,400))
