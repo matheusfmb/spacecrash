@@ -33,10 +33,15 @@ fx_over = pygame.mixer.Sound('assets\musicas\GAMEOVERSOUND.wav')
 pygame.mixer.Sound.set_volume(fx_over, 0.3)
 play_again = True
 
+#VIDA
+vida = 3
+vida_image = 1
+vida_sprite = pygame.image.load("assets/vidas/vida" + str(vida_image) +".png")
+
 
 #MÚSICA
 musica_fundo = pygame.mixer.music.load("assets/musicas/start.wav")
-pygame.mixer.music.set_volume(0.03)
+pygame.mixer.music.set_volume(0.01)
 pygame.mixer.music.play(-1)
 
 #VARIÁVEIS DA MOEDA - PONTUAÇÃO
@@ -54,6 +59,7 @@ pos_coin.append(coin_x)
 def coin_blit():
     janela.blit(coin,(coin_x,coin_y))
     janela.blit(text,(10,10))
+    janela.blit(vida_sprite,(20,40))
 
 #CARREGANDO IMAGEM DA NAVE E DEFININDO AS VARIÁVEIS PARA MOVIMENTO
 nave = pygame.image.load("assets/nave/spaceShips_008.png")
@@ -92,7 +98,7 @@ meteoro3 = pygame.image.load("assets\meteoros\meteoro3.png")
 meteoro_3x = random.randrange(0,sizex-40)
 meteoro_3y = 10
 
-meteoro4 = pygame.image.load("assets\meteoros\meteoro2.png")
+meteoro4 = pygame.image.load("assets\meteoros\meteoro4.png")
 meteoro_4x = random.randrange(0,sizex-40)
 meteoro_4y = 10
 
@@ -148,17 +154,26 @@ def colisao():
     global meteoro_3x
     global meteoro_4x
     global meteoro_4y
+    global vida
+    global vida_image
+    global vida_sprite
 
     if nave_rect.colliderect(meteoro1_rect) or nave_rect.colliderect(meteoro2_rect) or nave_rect.colliderect(meteoro3_rect) or nave_rect.colliderect(meteoro4_rect):
-        gameover = False
-        play_again = False
-        meteoro_1y = 10
-        meteoro_2y = 10
-        meteoro_3y = 10
-        meteoro_4y = 10
+        vida -= 1
+        vida_image += 1
+        if vida_image > 4:
+            vida_image = 1
+        vida_sprite = pygame.image.load("assets/vidas/vida" + str(vida_image) +".png")
+        if vida <= 0:
+            gameover = False
+            play_again = False
+            nave_x = 160
+            nave_y = 570
+        meteoro_1y = -410
+        meteoro_2y = -410
+        meteoro_3y = -410
+        meteoro_4y = -410
         coin_y = -150
-        nave_x = 160
-        nave_y = 550
         fx_over.play()
 
     if nave_rect.colliderect(coin_rect):
@@ -196,9 +211,15 @@ def draw():
     global nave_rect
     global score
     global text 
+    global vida
+    global vida_image
+    global vida_sprite
 
     if gameover:
         if start:
+            vida = 3
+            vida_image = 1
+            vida_sprite = pygame.image.load("assets/vidas/vida" + str(vida_image) +".png")
             score = 0
             text = font.render("score: " + str(score), True, (255,225,225))
             janela.blit(backstart,(0,0))
@@ -297,13 +318,13 @@ def move_ast_coin_laser():
             if coin_x in pos_coin:
                 coin_x = random.randrange(0,sizex-40)
         laser_y -= velocidade_laser
-        if laser_y < -600:
+        if laser_y < -1000:
             laser_x = nave_x + 25
             laser_y = nave_y - 50
         
         if len(pos_coin) > 20:
             pos_coin.clear()
-        if len(pos_meteoro) > 50:
+        if len(pos_meteoro) > 100:
             pos_meteoro.clear()
 
 # DEFININDO MOVIMENTAÇÃO DA NAVE
