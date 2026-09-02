@@ -18,3 +18,6 @@
 <p align="center">www.github.com/matheusfmb</p>
 <p align="center">www.github.com/HeitorNOC</p>
 
+<h3 align="center">refatoração (2026)</h3>
+<p align="center">Código original refatorado por Matheus em 2026: reorganizado em módulos e classes (orientação a objetos, máquina de estados de tela, sprites/Groups do pygame para colisão, movimento por delta-time), com animações novas (propulsor, explosões, moeda girando, transições) e um menu de opções de áudio — mantendo a mecânica original do jogo.</p>
+
